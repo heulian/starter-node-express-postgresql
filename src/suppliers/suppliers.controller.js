@@ -70,7 +70,7 @@ function create(req, res, next) {
 module.exports = {
   create: [hasOnlyValidProperties, hasRequiredProperties,create],
 
-  update,
+  update: [hasOnlyValidProperties, hasRequiredProperties, update]
   delete: destroy,
 };
 //^^Finally add create and validation middleware to the module.exports object
