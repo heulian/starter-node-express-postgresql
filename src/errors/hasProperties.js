@@ -1,3 +1,6 @@
+//Validation middleware created in new file so can be used by any controller
+
+
 function hasProperties(...properties) {
     return function (req, res, next) {
       const { data = {} } = req.body;
@@ -16,5 +19,5 @@ function hasProperties(...properties) {
       }
     };
   }
-  
+
   module.exports = hasProperties;
