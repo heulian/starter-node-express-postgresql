@@ -5,9 +5,7 @@ async function create(req, res, next) {
   res.status(201).json({ data: { supplier_name: "new supplier" } });
 }
 
-async function update(req, res, next) {
-  res.json({ data: { supplier_name: "updated supplier" } });
-}
+
 
 async function destroy(req, res, next) {
   res.sendStatus(204);
@@ -66,11 +64,47 @@ function create(req, res, next) {
 //  .then((createdRecords)=>createdRecords[0])      //be a string or an array(returning() also works for update and delete methods)
 //}
 
+//=======Add supplierExists() validation middleware in suppliers.controllers.js for PUT request-------
+function supplierExists(req, res, next) {
+  suppliersService
+    .read(req.params.supplierId)
+    .then((supplier) => {
+      if (supplier) {
+        res.locals.supplier = supplier;
+        return next();
+      }
+      next({ status: 404, message: `Supplier cannot be found.` });
+    })
+    .catch(next);
+}
 
+//Chaining then() to suppliersService.read() will execute the Knex query that 
+//you defined previously to retrieve a supplier given based on ID. 
+//The query returns a promise, which is handled in the then() function.
+
+//if supplier exists its stored in res.locals.supplier to accessible in rest of middleware 
+//pipeline otherwise next called with error object 
+
+//Next modify update
+function update(req, res, next) {
+  const updatedSupplier = {
+    ...req.body.data,
+    supplier_id: res.locals.supplier.supplier_id,
+  };
+  suppliersService
+    .update(updatedSupplier)
+    .then((data) => res.json({ data }))
+    .catch(next);
+}
+//^^^^ calls Suppliers.Service.update() method passing in the updatedSupplier object
+//supplier_id of updatedSupplier is set to exisiting supplier_id(res.locals.supplier.supplier_id)
+//to prevent the update from accdientally changing the supplier_id durting update
+//if promise resolves successfully server responds with updated supplier
 module.exports = {
   create: [hasOnlyValidProperties, hasRequiredProperties,create],
 
-  update: [hasOnlyValidProperties, hasRequiredProperties, update]
+  update: [supplierExists,hasOnlyValidProperties, hasRequiredProperties, update]
   delete: destroy,
 };
+
 //^^Finally add create and validation middleware to the module.exports object
