@@ -14,6 +14,7 @@ function list(req, res, next) {
 }
 //GET products/:productId endpoint: 1.add read() to products.service.js 2.add productExists middleware
 //to products.controller.js
+//test
 function productExists(req,res,next){
   productsService
   .read(req.params.productId)
